@@ -8,16 +8,13 @@ mod lpp;
 
 fn main() {
     println!("Hello, world!");
-    let a = lpp::Expr::parse("1 + 2");
-    println!(
-        "{}",
-
-            .unwrap()
-            .compile()
-            .unwrap()
-            .eval()
-            .unwrap()
-            .eval()
-            .unwrap()
-    );
+    let expr = lpp::Expr::parse("1 + 2")
+        .unwrap()
+        .compile()
+        .unwrap()
+        .eval()
+        .unwrap()
+        .expand()
+        .unwrap();
+    println!("{expr}");
 }
