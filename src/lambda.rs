@@ -1,24 +1,18 @@
 #[derive(Clone)]
 pub enum Expr {
     Variable(String),
-    LambdaAbstract(Function),
-    Apply(Box<Expr>, Box<Expr>),
-}
-
-#[derive(Clone)]
-pub struct Function {
-    bind: String,
-    expr: Box<Expr>,
+    LambdaAbstract { bind: String, body: Box<Expr> },
+    Apply { func: Box<Expr>, arg: Box<Expr> },
 }
 
 impl Expr {
     pub fn eval(&self) -> Option<Expr> {
         match self {
-            Expr::Apply(lambda, expr) => {
-                let Expr::LambdaAbstract(Function { bind, expr: body }) = lambda.eval()? else {
+            Expr::Apply { func, arg } => {
+                let Expr::LambdaAbstract { bind, body } = func.eval()? else {
                     return None;
                 };
-                body.bind(&bind, expr).eval()
+                body.bind(&bind, arg).eval()
             }
             Expr::Variable(_) => None,
             _ => Some(self.clone()),
@@ -28,16 +22,14 @@ impl Expr {
     pub fn bind(&self, name: &String, value: &Expr) -> Expr {
         match self {
             Expr::Variable(var) if var == name => value.clone(),
-            Expr::LambdaAbstract(Function { bind, expr }) if bind != name => {
-                Expr::LambdaAbstract(Function {
-                    bind: bind.clone(),
-                    expr: Box::new(expr.bind(name, value)),
-                })
-            }
-            Expr::Apply(lambda, expr) => Expr::Apply(
-                Box::new(lambda.bind(name, value)),
-                Box::new(expr.bind(name, value)),
-            ),
+            Expr::LambdaAbstract { bind, body } if bind != name => Expr::LambdaAbstract {
+                bind: bind.clone(),
+                body: Box::new(body.bind(name, value)),
+            },
+            Expr::Apply { func, arg } => Expr::Apply {
+                func: Box::new(func.bind(name, value)),
+                arg: Box::new(arg.bind(name, value)),
+            },
             _ => self.clone(),
         }
     }
