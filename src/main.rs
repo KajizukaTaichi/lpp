@@ -8,9 +8,10 @@ mod lpp;
 
 fn main() {
     println!("Hello, world!");
+    let a = lpp::Expr::parse("1 + 2");
     println!(
         "{}",
-        lpp::Expr::parse("1 + 2")
+
             .unwrap()
             .compile()
             .unwrap()
