@@ -45,6 +45,7 @@ impl Lambda {
             })
         } else {
             let tokens = tokenize(source)?;
+            dbg!(&tokens);
             if tokens.len() == 1 {
                 let token = tokens.last()?.to_string();
                 if token.starts_with("(") && token.ends_with(")") {
@@ -55,11 +56,13 @@ impl Lambda {
                 } else {
                     None
                 }
-            } else {
+            } else if tokens.len() >= 2 {
                 Some(Lambda::Apply {
                     func: Box::new(Lambda::parse(&tokens.get(..tokens.len() - 1)?.join(" "))?),
                     arg: Box::new(Lambda::parse(tokens.last()?)?),
                 })
+            } else {
+                None
             }
         }
     }
