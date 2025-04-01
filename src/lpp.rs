@@ -26,6 +26,7 @@ impl Value {
 pub enum Expr {
     Literal(Value),
     Add(Box<Expr>, Box<Expr>),
+    Mul(Box<Expr>, Box<Expr>),
 }
 
 impl Expr {
@@ -43,6 +44,7 @@ impl Expr {
             let has_lhs = || Expr::parse(&tokens.get(..tokens.len() - 2)?.join(" "));
             Some(match operator.as_str() {
                 "+" => Expr::Add(Box::new(has_lhs()?), Box::new(token)),
+                "*" => Expr::Mul(Box::new(has_lhs()?), Box::new(token)),
                 _ => return None,
             })
         }
@@ -54,6 +56,13 @@ impl Expr {
             Expr::Add(lhs, rhs) => Some(Lambda::Apply {
                 func: Box::new(Lambda::Apply {
                     func: Box::new(Lambda::parse("λm.λn.λf.λx.m f (n f x)")?),
+                    arg: Box::new(lhs.compile()?),
+                }),
+                arg: Box::new(rhs.compile()?),
+            }),
+            Expr::Mul(lhs, rhs) => Some(Lambda::Apply {
+                func: Box::new(Lambda::Apply {
+                    func: Box::new(Lambda::parse("λm.λn.λf.m (n f)")?),
                     arg: Box::new(lhs.compile()?),
                 }),
                 arg: Box::new(rhs.compile()?),
