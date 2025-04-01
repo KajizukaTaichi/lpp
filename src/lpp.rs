@@ -29,27 +29,35 @@ pub enum Expr {
 }
 
 impl Expr {
-    fn parse(source: &str) -> Option<Self> {
+    pub fn parse(source: &str) -> Option<Self> {
         let tokens: Vec<String> = tokenize(source)?;
-        let token = Expr::parse(tokens.last()?)?;
-        let operator = tokens.get(tokens.len().checked_sub(2)?)?;
-        let has_lhs = || Expr::parse(&tokens.get(..tokens.len() - 2)?.join(" "));
-        Some(match operator.as_str() {
-            "+" => Expr::Add(Box::new(has_lhs()?), Box::new(token)),
-            _ => return None,
-        })
+        if tokens.len() == 1 {
+            if let Ok(n) = tokens.last()?.parse::<usize>() {
+                Some(Expr::Literal(Value(n)))
+            } else {
+                None
+            }
+        } else {
+            let token = Expr::parse(tokens.last()?)?;
+            let operator = tokens.get(tokens.len().checked_sub(2)?)?;
+            let has_lhs = || Expr::parse(&tokens.get(..tokens.len() - 2)?.join(" "));
+            Some(match operator.as_str() {
+                "+" => Expr::Add(Box::new(has_lhs()?), Box::new(token)),
+                _ => return None,
+            })
+        }
     }
 
-    fn eval(&self) -> Lambda {
+    pub fn compile(&self) -> Option<Lambda> {
         match self {
-            Expr::Literal(value) => value.compile(),
-            Expr::Add(lhs, rhs) => Lambda::Abstract {
-                bind: String::from("m"),
-                body: Box::new(Lambda::Abstract {
-                    bind: String::from("n"),
-                    body: (),
+            Expr::Literal(value) => Some(value.compile()),
+            Expr::Add(lhs, rhs) => Some(Lambda::Apply {
+                func: Box::new(Lambda::Apply {
+                    func: Box::new(Lambda::parse("λm. λn. λf. λx. m f (n f x)")?),
+                    arg: Box::new(lhs.compile()?),
                 }),
-            },
+                arg: Box::new(rhs.compile()?),
+            }),
         }
     }
 }
