@@ -68,17 +68,24 @@ fn tokenize(input: &str) -> Option<Vec<String>> {
                     return None;
                 }
             }
+            ' ' => {
+                if nest == 0 {
+                    tokens.push(current.clone());
+                    current.clear();
+                } else {
+                    current.push(c)
+                }
+            }
             _ => current.push(c),
         }
     }
 
     // Syntax error check
     if nest != 0 {
-        return Err(Fault::Syntax);
+        return None;
     }
-    if !current_token.is_empty() {
-        tokens.push(current_token.clone());
-        current_token.clear();
+    if !current.is_empty() {
+        tokens.push(current.clone());
     }
-    Ok(tokens)
+    Some(tokens)
 }
