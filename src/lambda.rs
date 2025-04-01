@@ -48,7 +48,6 @@ impl Lambda {
             })
         } else {
             let tokens = tokenize(source)?;
-            dbg!(&tokens);
             if tokens.len() == 1 {
                 let token = tokens.last()?.to_string();
                 if token.starts_with("(") && token.ends_with(")") {
