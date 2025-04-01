@@ -53,31 +53,7 @@ impl Expr {
             Expr::Literal(value) => Some(value.compile()),
             Expr::Add(lhs, rhs) => Some(Lambda::Apply {
                 func: Box::new(Lambda::Apply {
-                    func: Box::new(Lambda::Abstract {
-                        bind: String::from("m"),
-                        body: Box::new(Lambda::Abstract {
-                            bind: String::from("n"),
-                            body: Box::new(Lambda::Abstract {
-                                bind: String::from("f"),
-                                body: Box::new(Lambda::Abstract {
-                                    bind: String::from("x"),
-                                    body: Box::new(Lambda::Apply {
-                                        func: Box::new(Lambda::Apply {
-                                            func: Box::new(Lambda::Variable(String::from("m"))),
-                                            arg: Box::new(Lambda::Variable(String::from("f"))),
-                                        }),
-                                        arg: Box::new(Lambda::Apply {
-                                            func: Box::new(Lambda::Apply {
-                                                func: Box::new(Lambda::Variable(String::from("n"))),
-                                                arg: Box::new(Lambda::Variable(String::from("f"))),
-                                            }),
-                                            arg: Box::new(Lambda::Variable(String::from("x"))),
-                                        }),
-                                    }),
-                                }),
-                            }),
-                        }),
-                    }),
+                    func: Box::new(Lambda::parse("λm.λn.λf.λx.m f (n f x)")?),
                     arg: Box::new(lhs.compile()?),
                 }),
                 arg: Box::new(rhs.compile()?),
