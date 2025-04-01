@@ -38,14 +38,14 @@ impl Lambda {
         }
     }
 
-    pub fn compile_to_python(&self) -> String {
+    pub fn compile(&self) -> String {
         match self {
             Lambda::Variable(var) => format!("{var}"),
             Lambda::Abstract { bind, body } => {
-                format!("(lambda {bind}: {})", body.compile_to_python())
+                format!("(lambda {bind}: {})", body.compile())
             }
             Lambda::Apply { func, arg } => {
-                format!("{}({})", func.compile_to_python(), arg.compile_to_python())
+                format!("{}({})", func.compile(), arg.compile())
             }
         }
     }
