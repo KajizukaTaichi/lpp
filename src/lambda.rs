@@ -1,6 +1,6 @@
 use crate::*;
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub enum Lambda {
     Variable(String),
     Abstract { bind: String, body: Box<Lambda> },
@@ -14,7 +14,7 @@ impl Lambda {
                 let Lambda::Abstract { bind, body } = func.eval()? else {
                     return None;
                 };
-                body.bind(&bind, arg).eval()
+                body.bind(&bind, &arg.eval()?).eval()
             }
             Lambda::Variable(_) => None,
             _ => Some(self.clone()),
