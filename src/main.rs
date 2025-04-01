@@ -7,11 +7,10 @@ mod lexer;
 mod lpp;
 
 fn main() {
-    println!("Hello, world!");
     let expr = lpp::Expr::parse("1 + 2 + 2")
         .unwrap()
         .compile()
         .unwrap()
         .compile();
-    println!("{expr}");
+    println!("{expr}(lambda x: x + 1)(0)");
 }
