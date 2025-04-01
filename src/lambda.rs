@@ -1,34 +1,34 @@
-use std::fmt::{self, Display, Formatter};
+use crate::*;
 
 #[derive(Clone)]
-pub enum Expr {
+pub enum Lambda {
     Variable(String),
-    LambdaAbstract { bind: String, body: Box<Expr> },
-    Apply { func: Box<Expr>, arg: Box<Expr> },
+    Abstract { bind: String, body: Box<Lambda> },
+    Apply { func: Box<Lambda>, arg: Box<Lambda> },
 }
 
-impl Expr {
-    pub fn eval(&self) -> Option<Expr> {
+impl Lambda {
+    pub fn eval(&self) -> Option<Lambda> {
         match self {
-            Expr::Apply { func, arg } => {
-                let Expr::LambdaAbstract { bind, body } = func.eval()? else {
+            Lambda::Apply { func, arg } => {
+                let Lambda::Abstract { bind, body } = func.eval()? else {
                     return None;
                 };
                 body.bind(&bind, arg).eval()
             }
-            Expr::Variable(_) => None,
+            Lambda::Variable(_) => None,
             _ => Some(self.clone()),
         }
     }
 
-    pub fn bind(&self, name: &String, value: &Expr) -> Expr {
+    pub fn bind(&self, name: &String, value: &Lambda) -> Lambda {
         match self {
-            Expr::Variable(var) if var == name => value.clone(),
-            Expr::LambdaAbstract { bind, body } if bind != name => Expr::LambdaAbstract {
+            Lambda::Variable(var) if var == name => value.clone(),
+            Lambda::Abstract { bind, body } if bind != name => Lambda::Abstract {
                 bind: bind.clone(),
                 body: Box::new(body.bind(name, value)),
             },
-            Expr::Apply { func, arg } => Expr::Apply {
+            Lambda::Apply { func, arg } => Lambda::Apply {
                 func: Box::new(func.bind(name, value)),
                 arg: Box::new(arg.bind(name, value)),
             },
@@ -36,12 +36,12 @@ impl Expr {
         }
     }
 
-    pub fn parse(source: &str) -> Option<Expr> {
+    pub fn parse(source: &str) -> Option<Lambda> {
         if let Some(source) = source.strip_prefix("\\") {
             let (bind, body) = source.split_once(".")?;
-            Some(Expr::LambdaAbstract {
+            Some(Lambda::Abstract {
                 bind: bind.trim().to_string(),
-                body: Box::new(Expr::parse(body)?),
+                body: Box::new(Lambda::parse(body)?),
             })
         } else {
             let tokens = tokenize(source)?;
@@ -49,69 +49,28 @@ impl Expr {
                 let token = tokens.last()?.to_string();
                 if token.starts_with("(") && token.ends_with(")") {
                     let token = token.get(1..token.len() - 1)?;
-                    Expr::parse(token)
+                    Lambda::parse(token)
                 } else if token.chars().count() == 1 {
-                    Some(Expr::Variable(token))
+                    Some(Lambda::Variable(token))
                 } else {
                     None
                 }
             } else {
-                Some(Expr::Apply {
-                    func: Box::new(Expr::parse(&tokens.get(..tokens.len() - 1)?.join(" "))?),
-                    arg: Box::new(Expr::parse(tokens.last()?)?),
+                Some(Lambda::Apply {
+                    func: Box::new(Lambda::parse(&tokens.get(..tokens.len() - 1)?.join(" "))?),
+                    arg: Box::new(Lambda::parse(tokens.last()?)?),
                 })
             }
         }
     }
 }
 
-impl Display for Expr {
+impl Display for Lambda {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self {
-            Expr::Variable(var) => write!(f, "{var}"),
-            Expr::LambdaAbstract { bind, body } => write!(f, "(λ{bind}. {body})"),
-            Expr::Apply { func, arg } => write!(f, "({func} {arg})"),
+            Lambda::Variable(var) => write!(f, "{var}"),
+            Lambda::Abstract { bind, body } => write!(f, "(λ{bind}. {body})"),
+            Lambda::Apply { func, arg } => write!(f, "({func} {arg})"),
         }
     }
-}
-
-fn tokenize(input: &str) -> Option<Vec<String>> {
-    let mut tokens: Vec<String> = Vec::new();
-    let mut current = String::new();
-    let mut nest: usize = 0;
-
-    for c in input.chars() {
-        match c {
-            '(' => {
-                current.push(c);
-                nest += 1;
-            }
-            ')' => {
-                current.push(c);
-                if nest != 0 {
-                    nest -= 1;
-                } else {
-                    return None;
-                }
-            }
-            ' ' => {
-                if nest == 0 {
-                    tokens.push(current.clone());
-                    current.clear();
-                } else {
-                    current.push(c)
-                }
-            }
-            _ => current.push(c),
-        }
-    }
-
-    // Syntax error check
-    if nest != 0 {
-        return None;
-    }
-    if !current.is_empty() {
-        tokens.push(current.clone());
-    }
-    Some(tokens)
 }
