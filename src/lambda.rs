@@ -8,37 +8,6 @@ pub enum Lambda {
 }
 
 impl Lambda {
-    pub fn eval(&self) -> Option<Lambda> {
-        match self {
-            Lambda::Apply { func, arg } => {
-                let Lambda::Abstract { bind, body } = func.eval()? else {
-                    return None;
-                };
-                body.bind(&bind, &arg.eval()?).eval()
-            }
-            Lambda::Abstract { bind, body } => Some(Lambda::Abstract {
-                bind: bind.clone(),
-                body: Box::new(body.eval()?),
-            }),
-            Lambda::Variable(_) => Some(self.clone()),
-        }
-    }
-
-    pub fn bind(&self, name: &String, value: &Lambda) -> Lambda {
-        match self {
-            Lambda::Variable(var) if var == name => value.clone(),
-            Lambda::Abstract { bind, body } => Lambda::Abstract {
-                bind: bind.clone(),
-                body: Box::new(body.bind(name, value)),
-            },
-            Lambda::Apply { func, arg } => Lambda::Apply {
-                func: Box::new(func.bind(name, value)),
-                arg: Box::new(arg.bind(name, value)),
-            },
-            _ => self.clone(),
-        }
-    }
-
     pub fn parse(source: &str) -> Option<Lambda> {
         if let Some(source) = source.strip_prefix("λ") {
             let (bind, body) = source.split_once(".")?;
@@ -69,11 +38,15 @@ impl Lambda {
         }
     }
 
-    pub fn compile(&self) -> String {
+    pub fn compile_to_python(&self) -> String {
         match self {
             Lambda::Variable(var) => format!("{var}"),
-            Lambda::Abstract { bind, body } => format!("(lambda {bind}: {})", body.compile()),
-            Lambda::Apply { func, arg } => format!("{}({})", func.compile(), arg.compile()),
+            Lambda::Abstract { bind, body } => {
+                format!("(lambda {bind}: {})", body.compile_to_python())
+            }
+            Lambda::Apply { func, arg } => {
+                format!("{}({})", func.compile_to_python(), arg.compile_to_python())
+            }
         }
     }
 }
