@@ -1,6 +1,6 @@
 use crate::*;
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct Value(pub usize);
 
 impl Value {
@@ -22,7 +22,7 @@ impl Value {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub enum Expr {
     Literal(Value),
     Add(Box<Expr>, Box<Expr>),
