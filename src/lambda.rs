@@ -1,3 +1,5 @@
+use std::fmt::{self, Display, Formatter};
+
 #[derive(Clone)]
 pub enum Expr {
     Variable(String),
@@ -31,6 +33,16 @@ impl Expr {
                 arg: Box::new(arg.bind(name, value)),
             },
             _ => self.clone(),
+        }
+    }
+}
+
+impl Display for Expr {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        match self {
+            Expr::Variable(var) => write!(f, "{var}"),
+            Expr::LambdaAbstract { bind, body } => write!(f, "(λ{bind}. {body})"),
+            Expr::Apply { func, arg } => write!(f, "({func} {arg})"),
         }
     }
 }
