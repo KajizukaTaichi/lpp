@@ -16,7 +16,10 @@ impl Lambda {
                 };
                 body.bind(&bind, &arg.eval()?).eval()
             }
-            Lambda::Variable(_) => None,
+            Lambda::Abstract { bind, body } => Some(Lambda::Abstract {
+                bind: bind.clone(),
+                body: Box::new(body.eval()?),
+            }),
             _ => Some(self.clone()),
         }
     }
