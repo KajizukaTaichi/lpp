@@ -33,8 +33,12 @@ impl Expr {
     pub fn parse(source: &str) -> Option<Self> {
         let tokens: Vec<String> = tokenize(source)?;
         if tokens.len() == 1 {
-            if let Ok(n) = tokens.last()?.parse::<usize>() {
+            let token = tokens.last()?;
+            if let Ok(n) = token.parse::<usize>() {
                 Some(Expr::Literal(Value(n)))
+            } else if token.starts_with("(") && token.ends_with(")") {
+                let token = token.get(1..token.len() - 1)?;
+                Expr::parse(token)
             } else {
                 None
             }
