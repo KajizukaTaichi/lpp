@@ -27,7 +27,7 @@ impl Lambda {
     pub fn bind(&self, name: &String, value: &Lambda) -> Lambda {
         match self {
             Lambda::Variable(var) if var == name => value.clone(),
-            Lambda::Abstract { bind, body } if bind != name => Lambda::Abstract {
+            Lambda::Abstract { bind, body } => Lambda::Abstract {
                 bind: bind.clone(),
                 body: Box::new(body.bind(name, value)),
             },
