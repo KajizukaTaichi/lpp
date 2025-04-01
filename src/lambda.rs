@@ -35,6 +35,8 @@ impl Expr {
             _ => self.clone(),
         }
     }
+
+    pub fn parse(source: &str) {}
 }
 
 impl Display for Expr {
@@ -45,4 +47,38 @@ impl Display for Expr {
             Expr::Apply { func, arg } => write!(f, "({func} {arg})"),
         }
     }
+}
+
+fn tokenize(input: &str) -> Option<Vec<String>> {
+    let mut tokens: Vec<String> = Vec::new();
+    let mut current = String::new();
+    let mut nest: usize = 0;
+
+    for c in input.chars() {
+        match c {
+            '(' => {
+                current.push(c);
+                nest += 1;
+            }
+            ')' => {
+                current.push(c);
+                if nest != 0 {
+                    nest -= 1;
+                } else {
+                    return None;
+                }
+            }
+            _ => current.push(c),
+        }
+    }
+
+    // Syntax error check
+    if nest != 0 {
+        return Err(Fault::Syntax);
+    }
+    if !current_token.is_empty() {
+        tokens.push(current_token.clone());
+        current_token.clear();
+    }
+    Ok(tokens)
 }
