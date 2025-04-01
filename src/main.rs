@@ -7,7 +7,7 @@ mod lexer;
 mod lpp;
 
 fn main() {
-    let expr = lpp::Expr::parse("1 + 2 + 2")
+    let expr = lpp::Expr::parse("1 + 2 + 2 * 3")
         .unwrap()
         .compile()
         .unwrap()
