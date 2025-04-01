@@ -20,17 +20,7 @@ impl Lambda {
                 bind: bind.clone(),
                 body: Box::new(body.eval()?),
             }),
-            _ => Some(self.clone()),
-        }
-    }
-
-    pub fn expand(&self) -> Option<Lambda> {
-        match self {
-            Lambda::Abstract { bind, body } => Some(Lambda::Abstract {
-                bind: bind.clone(),
-                body: Box::new(body.expand()?),
-            }),
-            _ => self.eval(),
+            Lambda::Variable(_) => Some(self.clone()),
         }
     }
 
