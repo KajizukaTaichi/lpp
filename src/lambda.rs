@@ -37,7 +37,7 @@ impl Lambda {
     }
 
     pub fn parse(source: &str) -> Option<Lambda> {
-        if let Some(source) = source.strip_prefix("\\") {
+        if let Some(source) = source.strip_prefix("λ") {
             let (bind, body) = source.split_once(".")?;
             Some(Lambda::Abstract {
                 bind: bind.trim().to_string(),
