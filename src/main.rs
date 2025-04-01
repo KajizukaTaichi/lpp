@@ -13,8 +13,6 @@ fn main() {
         .compile()
         .unwrap()
         .eval()
-        .unwrap()
-        .expand()
         .unwrap();
     println!("{expr}");
 }
