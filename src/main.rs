@@ -16,5 +16,7 @@ fn main() {
             .unwrap()
             .eval()
             .unwrap()
+            .eval()
+            .unwrap()
     );
 }
