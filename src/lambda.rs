@@ -36,7 +36,33 @@ impl Expr {
         }
     }
 
-    pub fn parse(source: &str) {}
+    pub fn parse(source: &str) -> Option<Expr> {
+        if let Some(source) = source.strip_prefix("\\") {
+            let (bind, body) = source.split_once(".")?;
+            Some(Expr::LambdaAbstract {
+                bind: bind.trim().to_string(),
+                body: Box::new(Expr::parse(body)?),
+            })
+        } else {
+            let tokens = tokenize(source)?;
+            if tokens.len() == 1 {
+                let token = tokens.last()?.to_string();
+                if token.starts_with("(") && token.ends_with(")") {
+                    let token = token.get(1..token.len() - 1)?;
+                    Expr::parse(token)
+                } else if token.chars().count() == 1 {
+                    Some(Expr::Variable(token))
+                } else {
+                    None
+                }
+            } else {
+                Some(Expr::Apply {
+                    func: Box::new(Expr::parse(&tokens.get(..tokens.len() - 1)?.join(" "))?),
+                    arg: Box::new(Expr::parse(tokens.last()?)?),
+                })
+            }
+        }
+    }
 }
 
 impl Display for Expr {
