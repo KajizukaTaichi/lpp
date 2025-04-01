@@ -8,5 +8,13 @@ mod lpp;
 
 fn main() {
     println!("Hello, world!");
-    println!("{}", lpp::Value(5).compile());
+    println!(
+        "{}",
+        lpp::Expr::parse("1 + 2")
+            .unwrap()
+            .compile()
+            .unwrap()
+            .eval()
+            .unwrap()
+    );
 }
