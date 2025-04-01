@@ -21,6 +21,16 @@ impl Lambda {
         }
     }
 
+    pub fn expand(&self) -> Option<Lambda> {
+        match self {
+            Lambda::Abstract { bind, body } => Some(Lambda::Abstract {
+                bind: bind.clone(),
+                body: Box::new(body.expand()?),
+            }),
+            _ => self.eval(),
+        }
+    }
+
     pub fn bind(&self, name: &String, value: &Lambda) -> Lambda {
         match self {
             Lambda::Variable(var) if var == name => value.clone(),
