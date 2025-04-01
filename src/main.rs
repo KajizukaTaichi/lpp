@@ -12,7 +12,6 @@ fn main() {
         .unwrap()
         .compile()
         .unwrap()
-        .eval()
-        .unwrap();
+        .compile();
     println!("{expr}");
 }
