@@ -1,10 +1,12 @@
-use lambda::Expr;
-use value::Value;
+use lambda::Lambda;
+use lexer::tokenize;
+use std::fmt::{self, Display, Formatter};
 
 mod lambda;
-mod value;
+mod lexer;
+mod lpp;
 
 fn main() {
     println!("Hello, world!");
-    println!("{}", Value(3).compile());
+    println!("{}", lpp::Value(5).compile());
 }
