@@ -68,6 +68,14 @@ impl Lambda {
             }
         }
     }
+
+    pub fn compile(&self) -> String {
+        match self {
+            Lambda::Variable(var) => format!("{var}"),
+            Lambda::Abstract { bind, body } => format!("(lambda {bind}: {})", body.compile()),
+            Lambda::Apply { func, arg } => format!("{}({})", func.compile(), arg.compile()),
+        }
+    }
 }
 
 impl Display for Lambda {
